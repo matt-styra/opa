@@ -5,6 +5,7 @@
 package topdown
 
 import (
+	"encoding/base64"
 	"encoding/json"
 
 	"github.com/open-policy-agent/opa/ast"
@@ -43,7 +44,28 @@ func builtinJSONUnmarshal(a ast.Value) (ast.Value, error) {
 	return ast.InterfaceToValue(x)
 }
 
+func builtinBase64UrlEncode(a ast.Value) (ast.Value, error) {
+	str, err := builtins.StringOperand(a, 1)
+	if err != nil {
+		return nil, err
+	}
+
+	return ast.String(base64.URLEncoding.EncodeToString([]byte(str))), nil
+}
+
+func builtinBase64UrlDecode(a ast.Value) (ast.Value, error) {
+	str, err := builtins.StringOperand(a, 1)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := base64.URLEncoding.DecodeString(string(str))
+	return ast.String(result), err
+}
+
 func init() {
 	RegisterFunctionalBuiltin1(ast.JSONMarshal.Name, builtinJSONMarshal)
 	RegisterFunctionalBuiltin1(ast.JSONUnmarshal.Name, builtinJSONUnmarshal)
+	RegisterFunctionalBuiltin1(ast.Base64UrlEncode.Name, builtinBase64UrlEncode)
+	RegisterFunctionalBuiltin1(ast.Base64UrlDecode.Name, builtinBase64UrlDecode)
 }
